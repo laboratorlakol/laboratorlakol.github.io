@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Mission Start</title>
+  <title>OUTLAWS</title>
+  <link id="favicon" rel="icon" href="">
   <style>
     * {
       margin: 0;
@@ -226,14 +227,11 @@
 </head>
 <body>
 
-  <!-- Canvas behind keypad -->
   <canvas id="matrixCanvas"></canvas>
 
   <div class="container">
-    <!-- Start Button -->
     <button id="startBtn">START</button>
 
-    <!-- Intro Glitch -->
     <div id="intro" class="hidden">
       <h2>Initializing...</h2>
       <img
@@ -243,7 +241,6 @@
       />
     </div>
 
-    <!-- Keypad -->
     <div id="keypad">
       <div class="display" id="display">----</div>
       <div class="keys">
@@ -264,22 +261,18 @@
     </div>
   </div>
 
-  <!-- Flickering congratulation message -->
   <div id="congratsMessage">Felicitări !</div>
 
-  <!-- Parchment paper with invisible visible-text and hidden-copy-text -->
   <div id="parchmentOverlay" tabindex="0" aria-label="Mission parchment">
-    <!-- Visible text fully transparent -->
     <div class="visible-text">
-Salut miac sala doresc si eu whitelist
+outlawsmc2.github.io
     </div>
-    <!-- Hidden text that will be copied instead -->
     <div class="hidden-copy-text" aria-hidden="true">
-Custom secret mission text you want to copy instead of the visible text.
+Esti cu un pas mai aproape dar ce vine dupa Ctrl+A ?
+
     </div>
   </div>
 
-  <!-- Robotic Laugh -->
   <audio id="laughAudio" preload="auto">
     <source
       src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_51239573ff.mp3?filename=evil-laugh-140077.mp3"
@@ -477,9 +470,52 @@ Custom secret mission text you want to copy instead of the visible text.
       parchmentOverlay.style.display = 'block';
       parchmentOverlay.focus();
     }
+    
+    // --- NEW CODE STARTS HERE ---
 
-    // Make sure the visible text is selectable but invisible, and the hidden-copy-text is copied
-    // Selection styling handled by CSS
+    // 1. FLASHING GREEN LIGHT FAVICON
+    const favicon = document.getElementById('favicon');
+    const faviconCanvas = document.createElement('canvas');
+    faviconCanvas.width = 32;
+    faviconCanvas.height = 32;
+    const faviconCtx = faviconCanvas.getContext('2d');
+    let isLightOn = true;
+
+    function createFaviconDataUrl(color) {
+        faviconCtx.clearRect(0, 0, 32, 32);
+        faviconCtx.beginPath();
+        faviconCtx.arc(16, 16, 14, 0, 2 * Math.PI);
+        faviconCtx.fillStyle = color;
+        faviconCtx.fill();
+        return faviconCanvas.toDataURL('image/png');
+    }
+
+    const greenFavicon = createFaviconDataUrl('#0f0'); // Bright green
+    const offFavicon = createFaviconDataUrl('#2a3d2a'); // Dark green
+
+    setInterval(() => {
+        favicon.href = isLightOn ? greenFavicon : offFavicon;
+        isLightOn = !isLightOn;
+    }, 500); // Flash every 500ms
+
+    // 2. DYNAMIC "OUTLAWS" TAB TITLE
+    const baseTitle = "OUTLAWS";
+
+    function shuffleTitle(str) {
+        const arr = str.split('');
+        // Fisher-Yates shuffle algorithm
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]]; // Swap elements
+        }
+        return arr.join('');
+    }
+
+    setInterval(() => {
+        document.title = shuffleTitle(baseTitle);
+    }, 250); // Change order every 250ms
+    
+    // --- NEW CODE ENDS HERE ---
   </script>
 </body>
 </html>
