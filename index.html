@@ -22,23 +22,23 @@
 
         /* Logo and Subtle Glow Effect */
         .logo-container {
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         .logo {
-            max-width: 350px;
+            max-width: 400px; /* Slightly larger for the new scale */
             height: auto;
-            /* Changed to a much softer, semi-transparent green glow */
             filter: drop-shadow(0 0 8px rgba(0, 255, 0, 0.4));
         }
 
-        /* Coming Soon Text */
+        /* Coming Soon Text - Scaled Up */
         .coming-soon-text {
-            font-size: 1.1rem;
-            letter-spacing: 3px;
-            color: #ccc;
+            font-size: 2.5rem; /* Increased size */
+            font-weight: bold;
+            letter-spacing: 5px;
+            color: #fff;
             text-transform: uppercase;
-            margin-bottom: 15px;
+            margin-bottom: 60px;
             display: flex;
             align-items: center;
         }
@@ -47,8 +47,9 @@
         .text-dots::after {
             content: '';
             display: inline-block;
-            width: 20px; /* Reserves space so the text doesn't jump */
+            width: 40px; /* Adjusted for larger font size */
             text-align: left;
+            color: #00ff00; /* Keeping the dots green for that accent */
             animation: type-dots 1.5s infinite steps(4, end);
         }
 
@@ -58,33 +59,6 @@
             50% { content: '..'; }
             75% { content: '...'; }
             100% { content: ''; }
-        }
-
-        /* Dots Loading Bar */
-        .dot-loader {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 50px;
-        }
-
-        .loader-dot {
-            width: 12px;
-            height: 12px;
-            background-color: #00ff00;
-            border-radius: 50%;
-            /* Subtle glow for the loading dots */
-            box-shadow: 0 0 5px rgba(0, 255, 0, 0.6);
-            animation: pulse 1.4s infinite ease-in-out both;
-        }
-
-        /* Stagger the animation for each dot */
-        .loader-dot:nth-child(1) { animation-delay: -0.32s; }
-        .loader-dot:nth-child(2) { animation-delay: -0.16s; }
-        .loader-dot:nth-child(3) { animation-delay: 0s; }
-
-        @keyframes pulse {
-            0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
-            40% { transform: scale(1); opacity: 1; }
         }
 
         /* Discord Icon Styling */
@@ -100,8 +74,8 @@
 
         .discord-icon {
             fill: #5865F2;
-            width: 45px;
-            height: 45px;
+            width: 50px;
+            height: 50px;
         }
     </style>
 </head>
@@ -113,12 +87,6 @@
 
     <div class="coming-soon-text">
         Coming Soon<span class="text-dots"></span>
-    </div>
-
-    <div class="dot-loader">
-        <div class="loader-dot"></div>
-        <div class="loader-dot"></div>
-        <div class="loader-dot"></div>
     </div>
 
     <a href="https://discord.gg/YOUR_INVITE_LINK_HERE" target="_blank" class="discord-link" title="Join our Discord">
