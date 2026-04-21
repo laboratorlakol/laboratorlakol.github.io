@@ -22,54 +22,30 @@
 
         /* Logo and Glow Effect */
         .logo-container {
-            margin-bottom: 40px;
+            margin-bottom: 50px;
         }
 
         .logo {
-            /* * IF YOU ARE USING AN IMAGE:
-             * Delete the text properties below and uncomment the filter line to apply 
-             * the green glow directly to a transparent image (like a PNG).
-             */
-            /* filter: drop-shadow(0 0 20px #00ff00); */
-            
-            /* Text placeholder styling */
-            font-size: 4rem;
-            font-weight: bold;
-            color: #fff;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            /* Bright green text glow */
-            text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 40px #00ff00, 0 0 80px #00ff00;
+            max-width: 350px; /* Adjust this if your image is too big/small */
+            height: auto;
+            /* Applies the bright green glow directly to the edges of faded.png */
+            filter: drop-shadow(0 0 10px #00ff00) drop-shadow(0 0 30px #00ff00);
         }
 
-        /* Infinite Loading Bar */
-        .loading-container {
-            width: 300px;
-            height: 4px;
-            background-color: #222; /* Dark track */
-            border-radius: 4px;
-            overflow: hidden;
-            position: relative;
-            margin-bottom: 15px;
+        /* Spinning Infinity Symbol */
+        .infinity-spinner {
+            width: 80px;
+            height: 40px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 10px #00ff00);
+            /* The infinite spinning animation */
+            animation: spin 2s linear infinite;
         }
 
-        .loading-bar {
-            width: 40%;
-            height: 100%;
-            background-color: #00ff00; /* Green bar */
-            position: absolute;
-            left: -40%;
-            border-radius: 4px;
-            box-shadow: 0 0 10px #00ff00;
-            /* The infinite animation */
-            animation: indeterminate 1.5s infinite ease-in-out;
-        }
-
-        /* Keyframes for the bar moving back and forth/through */
-        @keyframes indeterminate {
-            0% { left: -40%; width: 30%; }
-            50% { left: 40%; width: 60%; }
-            100% { left: 100%; width: 30%; }
+        /* Keyframes for the continuous rotation */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         /* Coming Soon Text */
@@ -103,12 +79,12 @@
 <body>
 
     <div class="logo-container">
-        <div class="logo">LOGO</div>
+        <img src="faded.png" alt="Logo" class="logo">
     </div>
 
-    <div class="loading-container">
-        <div class="loading-bar"></div>
-    </div>
+    <svg class="infinity-spinner" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 50">
+        <path fill="none" stroke="#00ff00" stroke-width="6" stroke-linecap="round" d="M 25 10 A 15 15 0 1 0 25 40 C 45 40 55 10 75 10 A 15 15 0 1 1 75 40 C 55 40 45 10 25 10 Z" />
+    </svg>
 
     <div class="coming-soon-text">Coming Soon...</div>
 
