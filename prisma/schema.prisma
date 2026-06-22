@@ -1,0 +1,159 @@
+// FADED Romania Roleplay — database schema
+// Provider: PostgreSQL (Neon free tier recommended)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // Neon's pooled connection string goes in DATABASE_URL (used at runtime).
+  // directUrl is the *unpooled* connection, required by `prisma migrate`.
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+// Role hierarchy, low -> high. Stored as a Postgres enum so it's cheap to
+// index/filter on, and the order below is the order used everywhere in the
+// app (e.g. "is this role >= Moderator?") — see lib/auth/rbac.ts.
+enum Role {
+  MEMBER
+  VERIFIED_PLAYER
+  SUPPORT
+  MODERATOR
+  ADMINISTRATOR
+  SENIOR_ADMINISTRATOR
+  HEAD_STAFF
+  MANAGER
+  CO_FOUNDER
+  FOUNDER
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+}
+
+model User {
+  id            String   @id @default(cuid())
+  username      String   @unique
+  email         String   @unique
+  passwordHash  String
+  role          Role     @default(MEMBER)
+  status        AccountStatus @default(ACTIVE)
+  emailVerified Boolean  @default(false)
+
+  // Filled in once the player links their website account to their
+  // in-game character via the /codsite flow (phase 3 — FiveM integration).
+  citizenId     String?  @unique
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  refreshTokens          RefreshToken[]
+  emailVerificationTokens EmailVerificationToken[]
+  passwordResetTokens     PasswordResetToken[]
+  auditLogs               AuditLog[]
+  warnings                Warning[]
+  timeouts                Timeout[]
+  bans                    Ban[]
+
+  @@index([email])
+  @@index([username])
+}
+
+// One row per issued refresh token (hashed, never stored in plaintext).
+// Lets us revoke a single session ("log out this device") instead of all.
+model RefreshToken {
+  id         String    @id @default(cuid())
+  tokenHash  String    @unique
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userAgent  String?
+  ip         String?
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// Append-only trail for every security-relevant action — required by the
+// brief ("Staff Logs"): logins, role changes, bans, password resets, etc.
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  metadata  Json?
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model Warning {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reason    String
+  issuedBy  String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Timeout {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reason    String
+  issuedBy  String
+  startsAt  DateTime @default(now())
+  endsAt    DateTime
+  liftedAt  DateTime?
+
+  @@index([userId])
+}
+
+model Ban {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reason      String
+  issuedBy    String
+  permanent   Boolean  @default(false)
+  expiresAt   DateTime?
+  liftedAt    DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+}
