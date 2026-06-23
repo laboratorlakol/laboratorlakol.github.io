@@ -59,6 +59,9 @@ model User {
   bans                    Ban[]
   forumTopics             ForumTopic[]
   forumPosts              ForumPost[]
+  tickets                 Ticket[]
+  ticketMessages          TicketMessage[]
+  ticketParticipations    TicketParticipant[]
 
   @@index([email])
   @@index([username])
@@ -303,4 +306,66 @@ model RegulationArticle {
   updatedAt DateTime          @updatedAt
 
   @@index([chapterId])
+}
+
+// --- Suport / Tickets -----------------------------------------------------
+// Private thread between a player and staff. Each category has its own
+// minimum staff rank required to see/handle it — enforced in
+// lib/tickets/permissions.ts, not just here. TicketParticipant lets staff
+// explicitly loop in one extra person regardless of their rank.
+enum TicketCategory {
+  REPORT_PLAYER   // Raportare Jucător — toate gradele de staff (Helper+)
+  REPORT_STAFF    // Raportare Membru Staff — Supervizor+
+  SANCTION_APPEAL // Contestare Sancțiune — Administrator+
+  CONTACT_FOUNDER // Contact Fondator — doar Fondator
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+}
+
+model Ticket {
+  id           String         @id @default(cuid())
+  subject      String
+  category     TicketCategory @default(REPORT_PLAYER)
+  status       TicketStatus   @default(OPEN)
+  userId       String
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  messages     TicketMessage[]
+  participants TicketParticipant[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([category])
+}
+
+model TicketMessage {
+  id           String   @id @default(cuid())
+  ticketId     String
+  ticket       Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorId     String?
+  author       User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  content      String
+  isStaffReply Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  @@index([ticketId])
+}
+
+// One extra person explicitly looped into a specific ticket, regardless of
+// whether their rank would normally qualify for that category.
+model TicketParticipant {
+  id       String   @id @default(cuid())
+  ticketId String
+  ticket   Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  addedAt  DateTime @default(now())
+
+  @@unique([ticketId, userId])
+  @@index([ticketId])
 }

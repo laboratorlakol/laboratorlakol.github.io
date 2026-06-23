@@ -3,11 +3,20 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Menu, X, User as UserIcon, LogOut, ShieldCheck } from "lucide-react";
+import { Menu, X, User as UserIcon, LogOut, ShieldCheck, Ticket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth/auth-context";
 
 const PANEL_ROLES = ["COMMUNITY_MANAGER", "CO_FOUNDER", "FOUNDER"];
+const STAFF_ROLES = [
+  "HELPER",
+  "MODERATOR",
+  "ADMINISTRATOR",
+  "SUPERVISOR",
+  "COMMUNITY_MANAGER",
+  "CO_FOUNDER",
+  "FOUNDER",
+];
 
 const NAV_LINKS = [
   { label: "Despre", href: "#despre" },
@@ -76,6 +85,13 @@ export function Navbar() {
                   </Link>
                 </Button>
               )}
+              {STAFF_ROLES.includes(user.role) && (
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/staff/tickets" className="inline-flex items-center gap-1.5">
+                    <Ticket size={14} /> Tickete
+                  </Link>
+                </Button>
+              )}
               <Button variant="ghost" size="sm" asChild>
                 <Link href="/dashboard" className="inline-flex items-center gap-1.5">
                   <UserIcon size={14} /> {user.username}
@@ -126,6 +142,13 @@ export function Navbar() {
                   <Button variant="outline" asChild>
                     <Link href="/admin" onClick={() => setOpen(false)}>
                       Admin Panel
+                    </Link>
+                  </Button>
+                )}
+                {STAFF_ROLES.includes(user.role) && (
+                  <Button variant="outline" asChild>
+                    <Link href="/staff/tickets" onClick={() => setOpen(false)}>
+                      Tickete Staff
                     </Link>
                   </Button>
                 )}
