@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import Script from "next/script";
 
 declare global {
@@ -12,7 +12,7 @@ declare global {
           sitekey: string;
           callback: (token: string) => void;
           "expired-callback"?: () => void;
-          "error-callback"?: () => void;
+          "error-callback"?: (errorCode?: string) => void;
           theme?: "light" | "dark" | "auto";
         }
       ) => string;
@@ -34,18 +34,35 @@ export function TurnstileWidget({
   const elementId = useId().replace(/:/g, "");
   const widgetIdRef = useRef<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [status, setStatus] = useState<"loading" | "ready" | "timeout" | "error">("loading");
+  const [errorDetail, setErrorDetail] = useState<string | null>(null);
 
   useEffect(() => {
     if (!SITE_KEY) return;
 
     function render() {
       if (!window.turnstile || !containerRef.current || widgetIdRef.current) return;
-      widgetIdRef.current = window.turnstile.render(containerRef.current, {
-        sitekey: SITE_KEY!,
-        theme: "dark",
-        callback: onVerify,
-        "expired-callback": onExpire,
-      });
+      try {
+        widgetIdRef.current = window.turnstile.render(containerRef.current, {
+          sitekey: SITE_KEY!,
+          theme: "dark",
+          callback: (token) => {
+            setStatus("ready");
+            onVerify(token);
+          },
+          "expired-callback": onExpire,
+          "error-callback": (code) => {
+            console.error("[Turnstile] error-callback:", code);
+            setStatus("error");
+            setErrorDetail(code ?? "necunoscută");
+          },
+        });
+        setStatus("ready");
+      } catch (err) {
+        console.error("[Turnstile] render() threw:", err);
+        setStatus("error");
+        setErrorDetail(err instanceof Error ? err.message : String(err));
+      }
     }
 
     if (window.turnstile) {
@@ -57,21 +74,56 @@ export function TurnstileWidget({
           clearInterval(interval);
         }
       }, 200);
-      return () => clearInterval(interval);
+
+      // If the script itself never loads (blocked, network, CSP) within
+      // 6s, say so explicitly instead of leaving a silent empty gap.
+      const timeout = setTimeout(() => {
+        if (!window.turnstile) {
+          console.error("[Turnstile] api.js never loaded window.turnstile after 6s");
+          setStatus("timeout");
+        }
+      }, 6000);
+
+      return () => {
+        clearInterval(interval);
+        clearTimeout(timeout);
+      };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!SITE_KEY) {
-    // Not configured yet — render nothing so register/login keep working
-    // unblocked while the site owner sets up Cloudflare.
+    console.warn("[Turnstile] NEXT_PUBLIC_TURNSTILE_SITE_KEY is not set in this build — widget disabled.");
     return null;
   }
 
   return (
-    <>
-      <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
+    <div>
+      <Script
+        src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+        strategy="afterInteractive"
+        onError={() => {
+          console.error("[Turnstile] <Script> failed to load api.js (network/CSP/ad-blocker?)");
+          setStatus("timeout");
+        }}
+      />
       <div ref={containerRef} id={`turnstile-${elementId}`} className="flex justify-center" />
-    </>
+
+      {status === "loading" && (
+        <p className="text-center text-[11px] text-ink-faint font-mono mt-1">
+          Se încarcă verificarea anti-bot...
+        </p>
+      )}
+      {status === "timeout" && (
+        <p className="text-center text-[11px] text-red-400 font-mono mt-1">
+          Scriptul Cloudflare nu s-a încărcat (blocat de rețea/extensie sau Cloudflare nu răspunde).
+        </p>
+      )}
+      {status === "error" && (
+        <p className="text-center text-[11px] text-red-400 font-mono mt-1">
+          Eroare widget Turnstile: {errorDetail}
+        </p>
+      )}
+    </div>
   );
 }
