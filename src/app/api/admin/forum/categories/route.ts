@@ -3,15 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdminSession } from "@/lib/auth/admin-guard";
 import { logAudit } from "@/lib/auth/audit";
-
-function slugify(name: string) {
-  return name
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // strip diacritics (ă, â, î, ș, ț -> a, a, i, s, t)
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
+import { slugify } from "@/lib/slugify";
 
 export async function GET() {
   const session = await requireAdminSession();

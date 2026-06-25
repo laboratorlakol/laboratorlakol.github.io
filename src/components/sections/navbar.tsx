@@ -13,6 +13,7 @@ import {
   ScrollText,
   MessageSquare,
   LifeBuoy,
+  Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth/auth-context";
@@ -84,6 +85,13 @@ export function Navbar() {
         </div>
 
         <div className="hidden lg:flex items-center gap-3 shrink-0">
+          <Link
+            href="/search"
+            aria-label="Caută"
+            className="text-ink-muted hover:text-signal transition-colors"
+          >
+            <Search size={18} />
+          </Link>
           {user ? (
             <>
               {PANEL_ROLES.includes(user.role) && (
@@ -147,6 +155,14 @@ export function Navbar() {
               </Link>
             );
           })}
+          <Link
+            href="/search"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2.5 text-ink-muted hover:text-signal"
+          >
+            <Search size={16} />
+            Caută
+          </Link>
           <div className="flex flex-col gap-3 pt-2">
             {user ? (
               <>

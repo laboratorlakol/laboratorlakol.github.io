@@ -16,6 +16,7 @@ export default function NewTopicPage() {
   const params = useParams<{ slug: string }>();
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
+  const [tagsInput, setTagsInput] = useState("");
   const [content, setContent] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -50,10 +51,16 @@ export default function NewTopicPage() {
     setSubmitting(true);
 
     try {
+      const tags = tagsInput
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean)
+        .slice(0, 5);
+
       const res = await fetch("/api/forum/topics", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ categoryId, title, content }),
+        body: JSON.stringify({ categoryId, title, content, tags }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -88,6 +95,11 @@ export default function NewTopicPage() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
+            />
+            <Input
+              placeholder="Taguri, separate prin virgulă (opțional, max 5)"
+              value={tagsInput}
+              onChange={(e) => setTagsInput(e.target.value)}
             />
             <MarkdownEditor
               value={content}
