@@ -22,8 +22,6 @@ declare global {
   }
 }
 
-const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
-
 export function TurnstileWidget({
   onVerify,
   onExpire,
@@ -34,17 +32,30 @@ export function TurnstileWidget({
   const elementId = useId().replace(/:/g, "");
   const widgetIdRef = useRef<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [siteKey, setSiteKey] = useState<string | null | undefined>(undefined); // undefined = still fetching
   const [status, setStatus] = useState<"loading" | "ready" | "timeout" | "error">("loading");
   const [errorDetail, setErrorDetail] = useState<string | null>(null);
 
+  // Fetch the site key live from the server on every mount — sidesteps any
+  // build-time NEXT_PUBLIC_ inlining issue entirely.
   useEffect(() => {
-    if (!SITE_KEY) return;
+    const t = setTimeout(() => {
+      fetch("/api/turnstile-config")
+        .then((res) => res.json())
+        .then((data) => setSiteKey(data.siteKey ?? null))
+        .catch(() => setSiteKey(null));
+    }, 0);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    if (!siteKey) return;
 
     function render() {
       if (!window.turnstile || !containerRef.current || widgetIdRef.current) return;
       try {
         widgetIdRef.current = window.turnstile.render(containerRef.current, {
-          sitekey: SITE_KEY!,
+          sitekey: siteKey!,
           theme: "dark",
           callback: (token) => {
             setStatus("ready");
@@ -75,8 +86,6 @@ export function TurnstileWidget({
         }
       }, 200);
 
-      // If the script itself never loads (blocked, network, CSP) within
-      // 6s, say so explicitly instead of leaving a silent empty gap.
       const timeout = setTimeout(() => {
         if (!window.turnstile) {
           console.error("[Turnstile] api.js never loaded window.turnstile after 6s");
@@ -90,10 +99,16 @@ export function TurnstileWidget({
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [siteKey]);
 
-  if (!SITE_KEY) {
-    console.warn("[Turnstile] NEXT_PUBLIC_TURNSTILE_SITE_KEY is not set in this build — widget disabled.");
+  if (siteKey === undefined) {
+    // Still fetching /api/turnstile-config — render nothing yet rather
+    // than flashing a "disabled" state.
+    return null;
+  }
+
+  if (!siteKey) {
+    console.warn("[Turnstile] TURNSTILE_SITE_KEY is not set on the server — widget disabled.");
     return null;
   }
 
