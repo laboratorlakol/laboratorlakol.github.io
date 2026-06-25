@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { AuthLayout } from "@/components/auth/auth-layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { TurnstileWidget } from "@/components/auth/turnstile-widget";
 import { useAuth } from "@/lib/auth/auth-context";
 import { Loader2 } from "lucide-react";
 
@@ -13,6 +14,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { refresh, user, loading: authLoading } = useAuth();
   const [form, setForm] = useState({ email: "", password: "" });
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -37,7 +39,7 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, turnstileToken }),
       });
       const data = await res.json();
 
@@ -101,6 +103,8 @@ export default function LoginPage() {
             {error}
           </p>
         )}
+
+        <TurnstileWidget onVerify={setTurnstileToken} onExpire={() => setTurnstileToken(null)} />
 
         <Button type="submit" variant="primary" className="w-full" disabled={loading}>
           {loading && <Loader2 className="animate-spin" size={16} />}

@@ -3,7 +3,17 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Menu, X, User as UserIcon, LogOut, ShieldCheck, Ticket } from "lucide-react";
+import {
+  Menu,
+  X,
+  User as UserIcon,
+  LogOut,
+  ShieldCheck,
+  Ticket,
+  ScrollText,
+  MessageSquare,
+  LifeBuoy,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth/auth-context";
 
@@ -18,13 +28,10 @@ const STAFF_ROLES = [
   "FOUNDER",
 ];
 
-const NAV_LINKS = [
-  { label: "Despre", href: "#despre" },
-  { label: "Features", href: "#features" },
-  { label: "Galerie", href: "#galerie" },
-  { label: "Echipă", href: "#echipa" },
-  { label: "Regulament", href: "/regulament" },
-  { label: "Forum", href: "/forum" },
+const PRIMARY_LINKS = [
+  { label: "Regulament", href: "/regulament", icon: ScrollText },
+  { label: "Forum", href: "/forum", icon: MessageSquare },
+  { label: "Ticket", href: "/suport", icon: LifeBuoy },
 ];
 
 export function Navbar() {
@@ -48,34 +55,35 @@ export function Navbar() {
       }`}
     >
       <nav className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 shrink-0">
+        <Link href="/" className="flex items-center gap-2.5 shrink-0">
           <Image
             src="/logo/faded-logo.png"
             alt="FADED Romania Roleplay"
-            width={40}
-            height={40}
+            width={42}
+            height={42}
             priority
             className="rounded-full"
           />
-          <span className="font-display uppercase text-lg tracking-wide text-ink leading-none">
+          <span className="font-display uppercase text-2xl tracking-wide text-ink leading-none">
             FADED
           </span>
         </Link>
 
-        <ul className="hidden lg:flex items-center gap-7 font-mono text-xs uppercase tracking-wider text-ink-muted">
-          {NAV_LINKS.map((link) => (
-            <li key={link.href}>
-              <Link
-                href={link.href}
-                className="transition-colors hover:text-signal"
-              >
-                {link.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <div className="hidden lg:flex flex-1 items-center justify-center gap-3">
+          {PRIMARY_LINKS.map((link) => {
+            const Icon = link.icon;
+            return (
+              <Button key={link.href} variant="outline" size="default" asChild>
+                <Link href={link.href} className="inline-flex items-center gap-2">
+                  <Icon size={16} />
+                  {link.label}
+                </Link>
+              </Button>
+            );
+          })}
+        </div>
 
-        <div className="hidden lg:flex items-center gap-3">
+        <div className="hidden lg:flex items-center gap-3 shrink-0">
           {user ? (
             <>
               {PANEL_ROLES.includes(user.role) && (
@@ -125,16 +133,20 @@ export function Navbar() {
 
       {open && (
         <div className="lg:hidden bg-void border-t border-line px-6 py-6 flex flex-col gap-5 font-mono text-sm uppercase tracking-wider">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setOpen(false)}
-              className="text-ink-muted hover:text-signal"
-            >
-              {link.label}
-            </Link>
-          ))}
+          {PRIMARY_LINKS.map((link) => {
+            const Icon = link.icon;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2.5 text-ink-muted hover:text-signal"
+              >
+                <Icon size={16} />
+                {link.label}
+              </Link>
+            );
+          })}
           <div className="flex flex-col gap-3 pt-2">
             {user ? (
               <>

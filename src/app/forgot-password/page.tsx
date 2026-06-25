@@ -5,10 +5,12 @@ import Link from "next/link";
 import { AuthLayout } from "@/components/auth/auth-layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { TurnstileWidget } from "@/components/auth/turnstile-widget";
 import { Loader2, MailCheck } from "lucide-react";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -19,7 +21,7 @@ export default function ForgotPasswordPage() {
       await fetch("/api/auth/request-password-reset", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, turnstileToken }),
       });
       setSent(true);
     } finally {
@@ -58,6 +60,7 @@ export default function ForgotPasswordPage() {
           autoComplete="email"
           required
         />
+        <TurnstileWidget onVerify={setTurnstileToken} onExpire={() => setTurnstileToken(null)} />
         <Button type="submit" variant="primary" className="w-full" disabled={loading}>
           {loading && <Loader2 className="animate-spin" size={16} />}
           Trimite link de resetare

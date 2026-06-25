@@ -1,30 +1,44 @@
 "use client";
 
 import { useState } from "react";
-import { Accessibility, X, RotateCcw } from "lucide-react";
-import { useAccessibility } from "@/lib/accessibility/accessibility-context";
+import {
+  Accessibility,
+  X,
+  RotateCcw,
+  Contrast,
+  Glasses,
+  BookOpen,
+  Type,
+  Link2,
+  MoveHorizontal,
+  PauseCircle,
+  ImageOff,
+  AlignLeft,
+  Droplet,
+  MousePointer2,
+} from "lucide-react";
+import {
+  useAccessibility,
+  type AccessibilitySettings,
+} from "@/lib/accessibility/accessibility-context";
+import { cn } from "@/lib/utils";
 
-const OPTIONS = [
-  {
-    key: "highContrast" as const,
-    label: "Contrast mare",
-    description: "Fundal complet negru, text mai alb, margini mai vizibile.",
-  },
-  {
-    key: "colorblindFriendly" as const,
-    label: "Mod daltonism",
-    description: "Înlocuiește paleta verde/roșu cu albastru/galben, mai ușor de distins.",
-  },
-  {
-    key: "dyslexiaFriendly" as const,
-    label: "Prietenos cu dislexia",
-    description: "Font simplu, spațiere mai mare între litere și rânduri.",
-  },
-  {
-    key: "largeText" as const,
-    label: "Text mai mare",
-    description: "Crește dimensiunea textului pe tot site-ul.",
-  },
+const OPTIONS: {
+  key: keyof AccessibilitySettings;
+  label: string;
+  icon: typeof Contrast;
+}[] = [
+  { key: "highContrast", label: "Contrast Mare", icon: Contrast },
+  { key: "colorblindFriendly", label: "Daltonism", icon: Glasses },
+  { key: "dyslexiaFriendly", label: "Dislexie", icon: BookOpen },
+  { key: "largeText", label: "Text Mare", icon: Type },
+  { key: "highlightLinks", label: "Evidențiază Linkuri", icon: Link2 },
+  { key: "textSpacing", label: "Spațiere Text", icon: MoveHorizontal },
+  { key: "reducedMotion", label: "Reduce Animații", icon: PauseCircle },
+  { key: "hideImages", label: "Ascunde Imagini", icon: ImageOff },
+  { key: "textAlignLeft", label: "Aliniere Stânga", icon: AlignLeft },
+  { key: "reducedSaturation", label: "Saturație Redusă", icon: Droplet },
+  { key: "bigCursor", label: "Cursor Mare", icon: MousePointer2 },
 ];
 
 export function AccessibilityButton() {
@@ -42,9 +56,10 @@ export function AccessibilityButton() {
       </button>
 
       {open && (
-        <div className="fixed bottom-20 right-5 z-[60] w-80 panel border-glow rounded-md overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-line">
-            <span className="font-mono text-xs uppercase tracking-wider text-signal">
+        <div className="fixed bottom-20 right-5 z-[60] w-[330px] max-h-[70vh] flex flex-col panel border-glow rounded-md overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-line shrink-0">
+            <span className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-signal">
+              <Accessibility size={15} />
               Accesibilitate
             </span>
             <button
@@ -56,36 +71,37 @@ export function AccessibilityButton() {
             </button>
           </div>
 
-          <div className="px-4 py-3 space-y-3">
-            {OPTIONS.map((opt) => (
-              <label
-                key={opt.key}
-                className="flex items-start gap-3 cursor-pointer group"
-              >
-                <input
-                  type="checkbox"
-                  checked={settings[opt.key]}
-                  onChange={(e) => update({ [opt.key]: e.target.checked })}
-                  className="mt-0.5 accent-[var(--signal)]"
-                />
-                <span>
-                  <span className="text-sm text-ink group-hover:text-signal transition-colors">
+          <div className="px-3 py-3 overflow-y-auto grid grid-cols-3 gap-2">
+            {OPTIONS.map((opt) => {
+              const Icon = opt.icon;
+              const active = settings[opt.key];
+              return (
+                <button
+                  key={opt.key}
+                  onClick={() => update({ [opt.key]: !active })}
+                  aria-pressed={active}
+                  className={cn(
+                    "flex flex-col items-center justify-center gap-2 rounded-md border px-2 py-3.5 text-center transition-colors",
+                    active
+                      ? "border-signal bg-signal/10 text-signal"
+                      : "border-line text-ink-muted hover:border-line-strong hover:text-ink"
+                  )}
+                >
+                  <Icon size={20} />
+                  <span className="text-[10px] leading-tight font-mono uppercase tracking-wide">
                     {opt.label}
                   </span>
-                  <span className="block text-xs text-ink-faint mt-0.5">
-                    {opt.description}
-                  </span>
-                </span>
-              </label>
-            ))}
+                </button>
+              );
+            })}
           </div>
 
           <button
             onClick={reset}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-t border-line text-xs text-ink-faint hover:text-signal transition-colors font-mono uppercase tracking-wider"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-t border-line bg-panel-raised text-xs text-ink-faint hover:text-signal transition-colors font-mono uppercase tracking-wider shrink-0"
           >
             <RotateCcw size={13} />
-            Resetează
+            Resetează tot
           </button>
         </div>
       )}

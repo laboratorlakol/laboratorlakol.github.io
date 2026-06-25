@@ -12,6 +12,13 @@ export interface AccessibilitySettings {
   colorblindFriendly: boolean;
   dyslexiaFriendly: boolean;
   largeText: boolean;
+  highlightLinks: boolean;
+  textSpacing: boolean;
+  reducedMotion: boolean;
+  hideImages: boolean;
+  textAlignLeft: boolean;
+  reducedSaturation: boolean;
+  bigCursor: boolean;
 }
 
 const DEFAULT_SETTINGS: AccessibilitySettings = {
@@ -19,9 +26,33 @@ const DEFAULT_SETTINGS: AccessibilitySettings = {
   colorblindFriendly: false,
   dyslexiaFriendly: false,
   largeText: false,
+  highlightLinks: false,
+  textSpacing: false,
+  reducedMotion: false,
+  hideImages: false,
+  textAlignLeft: false,
+  reducedSaturation: false,
+  bigCursor: false,
 };
 
 const STORAGE_KEY = "faded-a11y-settings";
+
+// Maps each setting to the data-attribute toggled on <html>. Kept as a
+// table (not a hand-written list of toggleAttribute calls) so adding a new
+// toggle later is a one-line change here + one CSS block in globals.css.
+const ATTRIBUTE_MAP: Record<keyof AccessibilitySettings, string> = {
+  highContrast: "data-a11y-contrast",
+  colorblindFriendly: "data-a11y-colorblind",
+  dyslexiaFriendly: "data-a11y-dyslexia",
+  largeText: "data-a11y-large-text",
+  highlightLinks: "data-a11y-highlight-links",
+  textSpacing: "data-a11y-text-spacing",
+  reducedMotion: "data-a11y-reduced-motion",
+  hideImages: "data-a11y-hide-images",
+  textAlignLeft: "data-a11y-text-align-left",
+  reducedSaturation: "data-a11y-reduced-saturation",
+  bigCursor: "data-a11y-big-cursor",
+};
 
 interface AccessibilityContextValue {
   settings: AccessibilitySettings;
@@ -33,10 +64,9 @@ const AccessibilityContext = createContext<AccessibilityContextValue | null>(nul
 
 function applyToDocument(settings: AccessibilitySettings) {
   const root = document.documentElement;
-  root.toggleAttribute("data-a11y-contrast", settings.highContrast);
-  root.toggleAttribute("data-a11y-colorblind", settings.colorblindFriendly);
-  root.toggleAttribute("data-a11y-dyslexia", settings.dyslexiaFriendly);
-  root.toggleAttribute("data-a11y-large-text", settings.largeText);
+  for (const key of Object.keys(ATTRIBUTE_MAP) as (keyof AccessibilitySettings)[]) {
+    root.toggleAttribute(ATTRIBUTE_MAP[key], settings[key]);
+  }
 }
 
 export function AccessibilityProvider({ children }: { children: React.ReactNode }) {

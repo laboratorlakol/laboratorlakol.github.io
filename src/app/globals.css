@@ -207,3 +207,54 @@ html[data-a11y-dyslexia] li {
 html[data-a11y-large-text] {
   font-size: 118%;
 }
+
+/* Highlight links: makes every link visually obvious, not just on hover. */
+html[data-a11y-highlight-links] a {
+  text-decoration: underline !important;
+  text-decoration-thickness: 2px !important;
+  background: rgba(78, 255, 58, 0.12);
+  border-radius: 2px;
+}
+
+/* Text spacing: extra breathing room between letters/words/lines, without
+   changing the typeface (for readers who want spacing but like the font). */
+html[data-a11y-text-spacing] body {
+  letter-spacing: 0.04em;
+  word-spacing: 0.12em;
+  line-height: 1.9;
+}
+
+/* Reduced motion: stops our own decorative CSS animations (smoke drift,
+   pulse, blinking caret). Framer Motion's one-time entrance fades are
+   brief and left alone — this targets the looping ambient ones. */
+html[data-a11y-reduced-motion] .smoke-drift,
+html[data-a11y-reduced-motion] .terminal-caret::after,
+html[data-a11y-reduced-motion] .animate-ping,
+html[data-a11y-reduced-motion] .animate-spin {
+  animation: none !important;
+}
+
+/* Hide images: keeps layout, drops decorative/gallery imagery — useful for
+   slow connections or anyone distracted by motion/imagery. */
+html[data-a11y-hide-images] img:not([data-a11y-keep="true"]) {
+  opacity: 0 !important;
+}
+
+/* Force left-aligned text — some reading disabilities make justified or
+   centered paragraphs much harder to track line-to-line. */
+html[data-a11y-text-align-left] p,
+html[data-a11y-text-align-left] li {
+  text-align: left !important;
+}
+
+/* Reduced saturation: softer, less visually intense palette. */
+html[data-a11y-reduced-saturation] {
+  filter: saturate(0.55);
+}
+
+/* Big cursor: a simple high-contrast ring, easier to track on screen. */
+html[data-a11y-big-cursor],
+html[data-a11y-big-cursor] a,
+html[data-a11y-big-cursor] button {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="10" fill="none" stroke="%234EFF3A" stroke-width="3"/><circle cx="16" cy="16" r="3" fill="%234EFF3A"/></svg>') 16 16, auto !important;
+}

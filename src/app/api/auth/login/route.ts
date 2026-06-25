@@ -7,6 +7,7 @@ import { generateOpaqueToken } from "@/lib/auth/tokens";
 import { setAccessCookie, setRefreshCookie } from "@/lib/auth/cookies";
 import { logAudit, getClientIp } from "@/lib/auth/audit";
 import { rateLimit } from "@/lib/auth/rate-limit";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 
 export async function POST(req: Request) {
   const ip = getClientIp(req) ?? "unknown";
@@ -19,6 +20,15 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json().catch(() => null);
+
+  const isHuman = await verifyTurnstileToken(body?.turnstileToken, ip);
+  if (!isHuman) {
+    return NextResponse.json(
+      { error: "bot_check_failed", message: "Verificarea anti-bot a picat. Reîncarcă pagina și încearcă din nou." },
+      { status: 403 }
+    );
+  }
+
   const parsed = loginSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
