@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdminSession } from "@/lib/auth/admin-guard";
@@ -30,6 +31,7 @@ export async function PATCH(
 
   const category = await prisma.forumCategory.update({ where: { id }, data: parsed.data });
   await logAudit({ userId: session.sub, action: "admin_forum_category_update", metadata: { categoryId: id }, req });
+  revalidatePath("/forum");
 
   return NextResponse.json({ category });
 }
@@ -46,6 +48,7 @@ export async function DELETE(
   const { id } = await params;
   await prisma.forumCategory.delete({ where: { id } }); // cascades to topics + posts
   await logAudit({ userId: session.sub, action: "admin_forum_category_delete", metadata: { categoryId: id }, req });
+  revalidatePath("/forum");
 
   return NextResponse.json({ ok: true });
 }

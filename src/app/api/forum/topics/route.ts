@@ -1,33 +1,16 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth/session";
 import { logAudit } from "@/lib/auth/audit";
 import { rateLimit } from "@/lib/auth/rate-limit";
-import { slugify } from "@/lib/slugify";
 
 const bodySchema = z.object({
   categoryId: z.string().min(1),
   title: z.string().min(3).max(150),
   content: z.string().min(1).max(10000),
-  tags: z.array(z.string().min(1).max(30)).max(5).optional(),
 });
-
-async function resolveTags(tagNames: string[] | undefined) {
-  if (!tagNames || tagNames.length === 0) return [];
-  const cleaned = [...new Set(tagNames.map((t) => t.trim()).filter(Boolean))];
-
-  return Promise.all(
-    cleaned.map(async (name) => {
-      const slug = slugify(name) || name.toLowerCase();
-      return prisma.tag.upsert({
-        where: { slug },
-        update: {},
-        create: { name, slug },
-      });
-    })
-  );
-}
 
 export async function POST(req: Request) {
   const session = await getSession();
@@ -59,8 +42,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "category_not_found" }, { status: 404 });
   }
 
-  const tags = await resolveTags(parsed.data.tags);
-
   const topic = await prisma.forumTopic.create({
     data: {
       categoryId: category.id,
@@ -73,11 +54,10 @@ export async function POST(req: Request) {
           isFirstPost: true,
         },
       },
-      tags: { connect: tags.map((t) => ({ id: t.id })) },
     },
   });
 
   await logAudit({ userId: session.sub, action: "forum_topic_create", metadata: { topicId: topic.id }, req });
-
+  revalidatePath("/forum", "layout");
   return NextResponse.json({ topic });
 }

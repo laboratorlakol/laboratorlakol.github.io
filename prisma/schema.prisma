@@ -59,7 +59,6 @@ model User {
   bans                    Ban[]
   forumTopics             ForumTopic[]
   forumPosts              ForumPost[]
-  forumReactions          ForumPostReaction[]
   tickets                 Ticket[]
   ticketMessages          TicketMessage[]
   ticketParticipations    TicketParticipant[]
@@ -263,37 +262,9 @@ model ForumTopic {
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
   posts      ForumPost[]
-  tags       Tag[]
 
   @@index([categoryId])
   @@index([pinned])
-}
-
-model Tag {
-  id     String       @id @default(cuid())
-  name   String       @unique
-  slug   String       @unique
-  topics ForumTopic[]
-}
-
-enum ReactionType {
-  LIKE
-  LOVE
-  LAUGH
-  DISLIKE
-}
-
-model ForumPostReaction {
-  id        String       @id @default(cuid())
-  postId    String
-  post      ForumPost    @relation(fields: [postId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type      ReactionType
-  createdAt DateTime     @default(now())
-
-  @@unique([postId, userId])
-  @@index([postId])
 }
 
 model ForumPost {
@@ -306,7 +277,6 @@ model ForumPost {
   isFirstPost Boolean    @default(false) // the topic's own body, rendered as the OP
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-  reactions   ForumPostReaction[]
 
   @@index([topicId])
 }

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdminSession } from "@/lib/auth/admin-guard";
@@ -44,6 +45,7 @@ export async function POST(req: Request) {
   });
 
   await logAudit({ userId: session.sub, action: "admin_team_create", metadata: { memberId: member.id }, req });
+  revalidatePath("/");
 
   return NextResponse.json({ member });
 }

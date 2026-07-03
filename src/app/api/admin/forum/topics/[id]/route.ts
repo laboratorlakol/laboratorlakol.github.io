@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdminSession } from "@/lib/auth/admin-guard";
@@ -36,6 +37,8 @@ export async function PATCH(
     req,
   });
 
+  revalidatePath("/forum", "layout");
+
   return NextResponse.json({ topic });
 }
 
@@ -52,6 +55,7 @@ export async function DELETE(
   await prisma.forumTopic.delete({ where: { id } }); // cascades to posts
 
   await logAudit({ userId: session.sub, action: "admin_forum_topic_delete", metadata: { topicId: id }, req });
+  revalidatePath("/forum", "layout");
 
   return NextResponse.json({ ok: true });
 }

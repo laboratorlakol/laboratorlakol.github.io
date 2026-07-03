@@ -5,7 +5,7 @@ import { Footer } from "@/components/sections/footer";
 import { MessageSquare, Lock, Pin } from "lucide-react";
 import { getSiteSettings } from "@/lib/cms";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 20;
 
 export default async function ForumHomePage() {
   const [categories, settings] = await Promise.all([

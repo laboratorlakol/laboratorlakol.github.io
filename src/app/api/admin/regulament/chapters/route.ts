@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdminSession } from "@/lib/auth/admin-guard";
@@ -35,6 +36,6 @@ export async function POST(req: Request) {
 
   const chapter = await prisma.regulationChapter.create({ data: parsed.data });
   await logAudit({ userId: session.sub, action: "admin_regulation_chapter_create", metadata: { chapterId: chapter.id }, req });
-
+  revalidatePath("/regulament");
   return NextResponse.json({ chapter });
 }

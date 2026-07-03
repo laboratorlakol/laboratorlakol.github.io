@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdminSession } from "@/lib/auth/admin-guard";
@@ -28,7 +29,7 @@ export async function PATCH(
 
   const article = await prisma.regulationArticle.update({ where: { id }, data: parsed.data });
   await logAudit({ userId: session.sub, action: "admin_regulation_article_update", metadata: { articleId: id }, req });
-
+  revalidatePath("/regulament");
   return NextResponse.json({ article });
 }
 
@@ -44,6 +45,6 @@ export async function DELETE(
   const { id } = await params;
   await prisma.regulationArticle.delete({ where: { id } });
   await logAudit({ userId: session.sub, action: "admin_regulation_article_delete", metadata: { articleId: id }, req });
-
+  revalidatePath("/regulament");
   return NextResponse.json({ ok: true });
 }

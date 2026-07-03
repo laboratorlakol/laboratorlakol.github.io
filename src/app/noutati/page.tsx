@@ -5,7 +5,7 @@ import { Footer } from "@/components/sections/footer";
 import { getSiteSettings } from "@/lib/cms";
 import { ArrowUpRight } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 30;
 
 const CATEGORY_LABEL: Record<string, string> = {
   UPDATES: "Updates",

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireAdminSession } from "@/lib/auth/admin-guard";
 import { getSiteSettings, setSiteSetting } from "@/lib/cms";
@@ -46,6 +47,9 @@ export async function PUT(req: Request) {
     metadata: parsed.data,
     req,
   });
+
+  revalidatePath("/");
+  revalidatePath("/magazin");
 
   const settings = await getSiteSettings();
   return NextResponse.json({ settings });

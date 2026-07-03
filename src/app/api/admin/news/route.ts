@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { NewsCategory } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
@@ -39,6 +40,8 @@ export async function POST(req: Request) {
   });
 
   await logAudit({ userId: session.sub, action: "admin_news_create", metadata: { postId: post.id }, req });
+  revalidatePath("/");
+  revalidatePath("/noutati");
 
   return NextResponse.json({ post });
 }

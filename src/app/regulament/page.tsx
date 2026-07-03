@@ -4,7 +4,7 @@ import { getSiteSettings } from "@/lib/cms";
 import { prisma } from "@/lib/prisma";
 import { PostContent } from "@/components/forum/post-content";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function RegulamentPage() {
   const [chapters, settings] = await Promise.all([

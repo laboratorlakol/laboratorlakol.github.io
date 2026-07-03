@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { NewsCategory } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
@@ -31,6 +32,9 @@ export async function PATCH(
 
   const post = await prisma.newsPost.update({ where: { id }, data: parsed.data });
   await logAudit({ userId: session.sub, action: "admin_news_update", metadata: { postId: id }, req });
+  revalidatePath("/");
+  revalidatePath("/noutati");
+  revalidatePath(`/noutati/${id}`);
 
   return NextResponse.json({ post });
 }
@@ -47,6 +51,8 @@ export async function DELETE(
   const { id } = await params;
   await prisma.newsPost.delete({ where: { id } });
   await logAudit({ userId: session.sub, action: "admin_news_delete", metadata: { postId: id }, req });
+  revalidatePath("/");
+  revalidatePath("/noutati");
 
   return NextResponse.json({ ok: true });
 }

@@ -6,7 +6,7 @@ import { Footer } from "@/components/sections/footer";
 import { getSiteSettings } from "@/lib/cms";
 import { PostContent } from "@/components/forum/post-content";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 const CATEGORY_LABEL: Record<string, string> = {
   UPDATES: "Updates",

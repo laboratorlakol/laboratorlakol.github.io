@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth/session";
@@ -45,7 +46,7 @@ export async function PATCH(
     metadata: { postId: id },
     req,
   });
-
+  revalidatePath("/forum", "layout");
   return NextResponse.json({ post: updated });
 }
 
@@ -95,6 +96,6 @@ export async function DELETE(
     metadata: { postId: id },
     req,
   });
-
+  revalidatePath("/forum", "layout");
   return NextResponse.json({ ok: true });
 }

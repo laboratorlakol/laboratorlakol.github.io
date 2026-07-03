@@ -3,7 +3,7 @@ import { getSiteSettings } from "@/lib/cms";
 import { Navbar } from "@/components/sections/navbar";
 import { Footer } from "@/components/sections/footer";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function MagazinPage() {
   const settings = await getSiteSettings();

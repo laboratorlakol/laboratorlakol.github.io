@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth/session";
@@ -67,6 +68,6 @@ export async function POST(
 
   await prisma.forumTopic.update({ where: { id }, data: { updatedAt: new Date() } });
   await logAudit({ userId: session.sub, action: "forum_post_create", metadata: { topicId: id }, req });
-
+  revalidatePath("/forum", "layout");
   return NextResponse.json({ post });
 }

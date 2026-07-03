@@ -12,7 +12,7 @@ import { getSiteSettings, getTeamMembers, getPublishedNews } from "@/lib/cms";
 // CMS content (news, team, settings) lives in the database and can change
 // any time from /admin — this page must read it fresh on every request,
 // not get statically cached at build time.
-export const dynamic = "force-dynamic";
+export const revalidate = 30;
 
 export default async function Home() {
   const [settings, teamMembers, newsPosts] = await Promise.all([

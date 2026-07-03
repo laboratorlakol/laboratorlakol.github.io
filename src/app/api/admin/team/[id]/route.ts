@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdminSession } from "@/lib/auth/admin-guard";
@@ -37,6 +38,7 @@ export async function PATCH(
   });
 
   await logAudit({ userId: session.sub, action: "admin_team_update", metadata: { memberId: id }, req });
+  revalidatePath("/");
 
   return NextResponse.json({ member });
 }
@@ -53,6 +55,7 @@ export async function DELETE(
   const { id } = await params;
   await prisma.teamMember.delete({ where: { id } });
   await logAudit({ userId: session.sub, action: "admin_team_delete", metadata: { memberId: id }, req });
+  revalidatePath("/");
 
   return NextResponse.json({ ok: true });
 }
