@@ -1,0 +1,6 @@
+# FADED Romania Roleplay — Security Contact
+# If you've found a security vulnerability, please report it responsibly.
+
+Contact: mailto:contact@faded.ro
+Expires: 2027-07-10T00:00:00.000Z
+Preferred-Languages: ro, en

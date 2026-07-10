@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 
+const DEFAULT_DISCORD_URL = "https://discord.gg/dCAZbNzvaN";
+
 function buildColumns(discordUrl: string) {
   return [
     {
@@ -32,10 +34,9 @@ function buildColumns(discordUrl: string) {
   ];
 }
 
-const DEFAULT_DISCORD_URL = "https://discord.gg/dCAZbNzvaN";
-
 export function Footer({ discordUrl = DEFAULT_DISCORD_URL }: { discordUrl?: string }) {
   const columns = buildColumns(discordUrl);
+
   return (
     <footer className="relative bg-void border-t border-line px-6 py-16">
       <div className="mx-auto max-w-6xl">
@@ -57,6 +58,12 @@ export function Footer({ discordUrl = DEFAULT_DISCORD_URL }: { discordUrl?: stri
               Experiența roleplay premium din România. Server FiveM construit
               pentru roleplay serios.
             </p>
+            <a
+              href="mailto:contact@faded.ro"
+              className="inline-block mt-3 text-sm text-signal hover:underline"
+            >
+              contact@faded.ro
+            </a>
           </div>
 
           {columns.map((col) => (
@@ -80,12 +87,43 @@ export function Footer({ discordUrl = DEFAULT_DISCORD_URL }: { discordUrl?: stri
           ))}
         </div>
 
-        <div className="mt-14 pt-6 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-ink-faint font-mono">
-          <span>
-            © {new Date().getFullYear()} FADED ROMANIA ROLEPLAY. Toate
-            drepturile rezervate.
-          </span>
-          <span>Acest server nu este afiliat cu Rockstar Games sau Take-Two Interactive.</span>
+        <div className="mt-14 pt-6 border-t border-line space-y-3">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-ink-faint font-mono">
+            <span>
+              © {new Date().getFullYear()} FADED ROMANIA ROLEPLAY. Toate
+              drepturile rezervate.
+            </span>
+            <span>
+              Acest server nu este afiliat cu Rockstar Games sau Take-Two
+              Interactive.
+            </span>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-ink-faint">
+            <Link
+              href="/privacy"
+              className="hover:text-signal transition-colors"
+            >
+              Politică de Confidențialitate
+            </Link>
+            <span>·</span>
+            <Link
+              href="/regulament"
+              className="hover:text-signal transition-colors"
+            >
+              Regulament
+            </Link>
+            <span>·</span>
+            <a
+              href="mailto:contact@faded.ro"
+              className="hover:text-signal transition-colors"
+            >
+              contact@faded.ro
+            </a>
+            <span>·</span>
+            <span className="text-ink-faint/60">
+              Protecția datelor în conformitate cu GDPR (UE) 2016/679
+            </span>
+          </div>
         </div>
       </div>
     </footer>
