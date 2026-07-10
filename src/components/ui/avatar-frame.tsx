@@ -14,7 +14,7 @@ function initials(name: string) {
 const FRAME_STYLES: Record<string, string> = {
   circle:   "rounded-full border-4 border-void ring-2 ring-line",
   none:     "rounded-lg border-4 border-void",
-  cannabis: "rounded-full border-4 border-void ring-4 ring-signal shadow-[0_0_20px_rgba(78,255,58,0.55)]",
+  cannabis: "rounded-full border-4 border-void ring-2 ring-signal",  // kept as alias for circle
   hexagon:  "border-4 border-void ring-2 ring-signal",
 };
 

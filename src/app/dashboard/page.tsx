@@ -62,8 +62,8 @@ export default function DashboardPage() {
   const [linkError, setLinkError] = useState<string | null>(null);
   const [linkSuccess, setLinkSuccess] = useState<string | null>(null);
   const [linking, setLinking] = useState(false);
-  const [avatarInput, setAvatarInput] = useState("");
-  const [bannerInput, setBannerInput] = useState("");
+  const [avatarInput, setAvatarInput] = useState(user?.avatarUrl ?? "");
+  const [bannerInput, setBannerInput] = useState(user?.bannerUrl ?? "");
   const [frameChoice, setFrameChoice] = useState(user?.avatarFrame ?? 'circle');
   const [savingMedia, setSavingMedia] = useState(false);
   const [mediaSaved, setMediaSaved] = useState(false);
@@ -225,8 +225,8 @@ export default function DashboardPage() {
               <div>
                 <label className="font-mono text-xs uppercase tracking-wider text-ink-faint">Ramă poză de profil</label>
                 <div className="mt-2 flex gap-2 flex-wrap">
-                  {(["circle", "none", "cannabis", "hexagon"] as const).map((val) => {
-                    const labels: Record<string, string> = { circle: "Cerc", none: "Fără", cannabis: "Cannabis 🌿", hexagon: "Hexagon" };
+                  {(["circle", "none", "hexagon"] as const).map((val) => {
+                    const labels: Record<string, string> = { circle: "Cerc", none: "Fără", hexagon: "Hexagon" };
                     const active = frameChoice === val;
                     return (
                       <button

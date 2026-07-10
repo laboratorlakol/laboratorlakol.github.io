@@ -6,7 +6,7 @@ import { getSession } from "@/lib/auth/session";
 const bodySchema = z.object({
   avatarUrl: z.string().url().nullable().optional(),
   bannerUrl: z.string().url().nullable().optional(),
-  avatarFrame: z.enum(["circle", "none", "cannabis", "hexagon"]).optional(),
+  avatarFrame: z.enum(["circle", "none", "hexagon"]).optional(),
 });
 
 export async function PATCH(
