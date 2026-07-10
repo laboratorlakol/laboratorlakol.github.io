@@ -53,10 +53,15 @@ model User {
   role          Role          @default(MEMBER)
   status        AccountStatus @default(ACTIVE)
   emailVerified Boolean       @default(false)
-  citizenId     String?       @unique
-  characterName String?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  citizenId       String?  @unique
+  characterName   String?
+  fivemLicense    String?  @unique
+  playtimeMinutes Float    @default(0)
+  lastOnline      DateTime?
+  avatarUrl       String?
+  bannerUrl       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   refreshTokens           RefreshToken[]
   emailVerificationTokens EmailVerificationToken[]
