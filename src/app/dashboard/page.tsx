@@ -97,6 +97,7 @@ export default function DashboardPage() {
 
   async function saveMedia(e: React.FormEvent) {
     e.preventDefault();
+    if (!user) return;
     setSavingMedia(true); setMediaSaved(false);
     try {
       await fetch(`/api/users/${user.id}/media`, {
