@@ -1,6 +1,3 @@
-// FADED Romania Roleplay — database schema
-// Provider: PostgreSQL (Neon free tier recommended)
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,14 +5,9 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  // Neon's pooled connection string goes in DATABASE_URL (used at runtime).
-  // directUrl is the *unpooled* connection, required by `prisma migrate`.
   directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
-// Role hierarchy, low -> high (order matters — see lib/auth/rbac.ts).
-// MEMBER is the default rank everyone gets on registration; everything
-// above HELPER is a staff rank.
 enum Role {
   MEMBER
   HELPER
@@ -33,24 +25,40 @@ enum AccountStatus {
   BANNED
 }
 
+enum NewsCategory {
+  UPDATES
+  EVENTS
+  ANNOUNCEMENTS
+  DEVELOPMENT_LOGS
+}
+
+enum TicketCategory {
+  REPORT_PLAYER
+  REPORT_STAFF
+  SANCTION_APPEAL
+  CONTACT_FOUNDER
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+}
+
 model User {
-  id            String   @id @default(cuid())
-  username      String   @unique
-  email         String   @unique
+  id            String        @id @default(cuid())
+  username      String        @unique
+  email         String        @unique
   passwordHash  String
-  role          Role     @default(MEMBER)
+  role          Role          @default(MEMBER)
   status        AccountStatus @default(ACTIVE)
-  emailVerified Boolean  @default(false)
-
-  // Filled in once the player links their website account to their
-  // in-game character via the /codsite flow (phase 3 — FiveM integration).
-  citizenId     String?  @unique
+  emailVerified Boolean       @default(false)
+  citizenId     String?       @unique
   characterName String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  refreshTokens          RefreshToken[]
+  refreshTokens           RefreshToken[]
   emailVerificationTokens EmailVerificationToken[]
   passwordResetTokens     PasswordResetToken[]
   auditLogs               AuditLog[]
@@ -67,62 +75,41 @@ model User {
   @@index([username])
 }
 
-// One row per /codsite use in-game. Short-lived, single-use — the website
-// consumes it to permanently set User.citizenId.
-model FiveMLinkCode {
-  id            String    @id @default(cuid())
-  codeHash      String    @unique
-  citizenId     String
-  characterName String?
-  expiresAt     DateTime
-  usedAt        DateTime?
-  createdAt     DateTime  @default(now())
-
-  @@index([citizenId])
-}
-
-// One row per issued refresh token (hashed, never stored in plaintext).
-// Lets us revoke a single session ("log out this device") instead of all.
 model RefreshToken {
-  id         String    @id @default(cuid())
-  tokenHash  String    @unique
-  userId     String
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userAgent  String?
-  ip         String?
-  expiresAt  DateTime
-  revokedAt  DateTime?
-  createdAt  DateTime  @default(now())
-
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userAgent String?
+  ip        String?
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
   @@index([userId])
 }
 
 model EmailVerificationToken {
-  id        String   @id @default(cuid())
-  tokenHash String   @unique
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime @default(now())
-
+  createdAt DateTime  @default(now())
   @@index([userId])
 }
 
 model PasswordResetToken {
-  id        String   @id @default(cuid())
-  tokenHash String   @unique
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime @default(now())
-
+  createdAt DateTime  @default(now())
   @@index([userId])
 }
 
-// Append-only trail for every security-relevant action — required by the
-// brief ("Staff Logs"): logins, role changes, bans, password resets, etc.
 model AuditLog {
   id        String   @id @default(cuid())
   userId    String?
@@ -132,7 +119,6 @@ model AuditLog {
   ip        String?
   userAgent String?
   createdAt DateTime @default(now())
-
   @@index([userId])
   @@index([action])
   @@index([createdAt])
@@ -145,108 +131,89 @@ model Warning {
   reason    String
   issuedBy  String
   createdAt DateTime @default(now())
-
   @@index([userId])
 }
 
 model Timeout {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  reason    String
-  issuedBy  String
-  startsAt  DateTime @default(now())
-  endsAt    DateTime
-  liftedAt  DateTime?
-
+  id       String    @id @default(cuid())
+  userId   String
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reason   String
+  issuedBy String
+  startsAt DateTime  @default(now())
+  endsAt   DateTime
+  liftedAt DateTime?
   @@index([userId])
 }
 
 model Ban {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  reason      String
-  issuedBy    String
-  permanent   Boolean  @default(false)
-  expiresAt   DateTime?
-  liftedAt    DateTime?
-  createdAt   DateTime @default(now())
-
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reason    String
+  issuedBy  String
+  permanent Boolean   @default(false)
+  expiresAt DateTime?
+  liftedAt  DateTime?
+  createdAt DateTime  @default(now())
   @@index([userId])
 }
 
-// --- CMS -------------------------------------------------------------------
-// Simple key/value store for site-wide settings an admin can change without
-// touching code: Tebex URL, Discord invite link, etc.
+model FiveMLinkCode {
+  id            String    @id @default(cuid())
+  codeHash      String    @unique
+  citizenId     String
+  characterName String?
+  expiresAt     DateTime
+  usedAt        DateTime?
+  createdAt     DateTime  @default(now())
+  @@index([citizenId])
+}
+
 model SiteSetting {
   key       String   @id
   value     String
   updatedAt DateTime @updatedAt
 }
 
-// Drives the "Echipă" section on the homepage. `role` is a free-text label
-// (not the Role enum) so staff can be listed under a friendly title that
-// doesn't have to match their website permission rank 1:1.
 model TeamMember {
   id        String   @id @default(cuid())
   name      String
   role      String
   avatarUrl String?
-  position  Int      @default(0) // display order, lower = first
+  position  Int      @default(0)
   visible   Boolean  @default(true)
   userId    String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
   @@index([position])
 }
 
-enum NewsCategory {
-  UPDATES
-  EVENTS
-  ANNOUNCEMENTS
-  DEVELOPMENT_LOGS
-}
-
-// Drives the "Noutăți" section on the homepage.
 model NewsPost {
-  id          String       @id @default(cuid())
-  title       String
-  excerpt     String
-  content     String
-  category    NewsCategory @default(UPDATES)
-  published   Boolean      @default(false)
-  authorId    String?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-
+  id        String       @id @default(cuid())
+  title     String
+  excerpt   String
+  content   String
+  category  NewsCategory @default(UPDATES)
+  published Boolean      @default(false)
+  authorId  String?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
   @@index([published])
   @@index([category])
 }
 
-// --- Forum -------------------------------------------------------------
-// Categories are created and managed entirely from /admin — nothing is
-// pre-seeded, per the brief.
 model ForumCategory {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  slug        String   @unique
-  position    Int      @default(0)
-  pinned      Boolean  @default(false)
-
-  // If true, only the topic's own author + Supervisor-and-above can post
-  // replies (anyone can still view, and any member can still start their
-  // own topic — e.g. their own staff application). This is what gives
-  // Supervisor's "comment on Staff Application threads" permission an
-  // actual purpose.
+  id               String  @id @default(cuid())
+  name             String
+  description      String?
+  slug             String  @unique
+  position         Int     @default(0)
+  pinned           Boolean @default(false)
   staffOnlyReplies Boolean @default(false)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  topics    ForumTopic[]
-
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  topics           ForumTopic[]
   @@index([position])
 }
 
@@ -262,7 +229,6 @@ model ForumTopic {
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
   posts      ForumPost[]
-
   @@index([categoryId])
   @@index([pinned])
 }
@@ -274,24 +240,19 @@ model ForumPost {
   authorId    String?
   author      User?      @relation(fields: [authorId], references: [id], onDelete: SetNull)
   content     String
-  isFirstPost Boolean    @default(false) // the topic's own body, rendered as the OP
+  isFirstPost Boolean    @default(false)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-
   @@index([topicId])
 }
 
-// --- Regulament ----------------------------------------------------------
-// Hierarchical chapters -> articles, fully managed from /admin. Nothing
-// pre-seeded, per the brief.
 model RegulationChapter {
-  id        String   @id @default(cuid())
+  id        String              @id @default(cuid())
   title     String
-  position  Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  position  Int                 @default(0)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
   articles  RegulationArticle[]
-
   @@index([position])
 }
 
@@ -304,26 +265,7 @@ model RegulationArticle {
   position  Int               @default(0)
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
-
   @@index([chapterId])
-}
-
-// --- Suport / Tickets -----------------------------------------------------
-// Private thread between a player and staff. Each category has its own
-// minimum staff rank required to see/handle it — enforced in
-// lib/tickets/permissions.ts, not just here. TicketParticipant lets staff
-// explicitly loop in one extra person regardless of their rank.
-enum TicketCategory {
-  REPORT_PLAYER   // Raportare Jucător — toate gradele de staff (Helper+)
-  REPORT_STAFF    // Raportare Membru Staff — Supervizor+
-  SANCTION_APPEAL // Contestare Sancțiune — Administrator+
-  CONTACT_FOUNDER // Contact Fondator — doar Fondator
-}
-
-enum TicketStatus {
-  OPEN
-  IN_PROGRESS
-  CLOSED
 }
 
 model Ticket {
@@ -337,7 +279,6 @@ model Ticket {
   updatedAt    DateTime       @updatedAt
   messages     TicketMessage[]
   participants TicketParticipant[]
-
   @@index([userId])
   @@index([status])
   @@index([category])
@@ -352,12 +293,9 @@ model TicketMessage {
   content      String
   isStaffReply Boolean  @default(false)
   createdAt    DateTime @default(now())
-
   @@index([ticketId])
 }
 
-// One extra person explicitly looped into a specific ticket, regardless of
-// whether their rank would normally qualify for that category.
 model TicketParticipant {
   id       String   @id @default(cuid())
   ticketId String
@@ -365,7 +303,6 @@ model TicketParticipant {
   userId   String
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   addedAt  DateTime @default(now())
-
   @@unique([ticketId, userId])
   @@index([ticketId])
 }
