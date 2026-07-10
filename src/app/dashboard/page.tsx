@@ -64,6 +64,7 @@ export default function DashboardPage() {
   const [linking, setLinking] = useState(false);
   const [avatarInput, setAvatarInput] = useState("");
   const [bannerInput, setBannerInput] = useState("");
+  const [frameChoice, setFrameChoice] = useState(user?.avatarFrame ?? 'circle');
   const [savingMedia, setSavingMedia] = useState(false);
   const [mediaSaved, setMediaSaved] = useState(false);
 
@@ -102,7 +103,7 @@ export default function DashboardPage() {
     try {
       await fetch(`/api/users/${user.id}/media`, {
         method: "PATCH", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ avatarUrl: avatarInput || null, bannerUrl: bannerInput || null }),
+        body: JSON.stringify({ avatarUrl: avatarInput || null, bannerUrl: bannerInput || null, avatarFrame: frameChoice }),
       });
       setMediaSaved(true);
       setTimeout(() => setMediaSaved(false), 3000);
@@ -220,6 +221,14 @@ export default function DashboardPage() {
                   onChange={e => setBannerInput(e.target.value)}
                   placeholder="https://i.imgur.com/..."
                 />
+              </div>
+              <div>
+                <label className="font-mono text-xs uppercase tracking-wider text-ink-faint">Ramă poză de profil</label>
+                <div className="mt-2 flex gap-2 flex-wrap">
+                  {([['circle','Cerc'],['none','Fără'],['cannabis','Cannabis 🌿'],['hexagon','Hexagon']] as const).map(([val,label]) => (
+                    <button key={val} type="button" onClick={()=>setFrameChoice(val)} className={}>{label}</button>
+                  ))}
+                </div>
               </div>
               {mediaSaved && (
                 <p className="text-sm text-signal bg-signal/10 border border-line rounded-md px-3 py-2">

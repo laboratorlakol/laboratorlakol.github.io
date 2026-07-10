@@ -12,7 +12,7 @@ export async function GET() {
     select: {
       id: true, username: true, email: true, role: true,
       emailVerified: true, citizenId: true, characterName: true,
-      playtimeMinutes: true, avatarUrl: true, bannerUrl: true, createdAt: true,
+      playtimeMinutes: true, avatarUrl: true, bannerUrl: true, avatarFrame: true, createdAt: true,
     },
   });
 

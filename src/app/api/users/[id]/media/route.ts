@@ -6,6 +6,7 @@ import { getSession } from "@/lib/auth/session";
 const bodySchema = z.object({
   avatarUrl: z.string().url().nullable().optional(),
   bannerUrl: z.string().url().nullable().optional(),
+  avatarFrame: z.enum(["circle", "none", "cannabis", "hexagon"]).optional(),
 });
 
 export async function PATCH(
@@ -14,22 +15,19 @@ export async function PATCH(
 ) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-
   const { id } = await params;
   if (id !== session.sub) return NextResponse.json({ error: "forbidden" }, { status: 403 });
-
   const body = await req.json().catch(() => null);
   const parsed = bodySchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "validation_error" }, { status: 400 });
-
   const user = await prisma.user.update({
     where: { id },
     data: {
       ...(parsed.data.avatarUrl !== undefined ? { avatarUrl: parsed.data.avatarUrl } : {}),
       ...(parsed.data.bannerUrl !== undefined ? { bannerUrl: parsed.data.bannerUrl } : {}),
+      ...(parsed.data.avatarFrame !== undefined ? { avatarFrame: parsed.data.avatarFrame } : {}),
     },
-    select: { avatarUrl: true, bannerUrl: true },
+    select: { avatarUrl: true, bannerUrl: true, avatarFrame: true },
   });
-
   return NextResponse.json({ user });
 }

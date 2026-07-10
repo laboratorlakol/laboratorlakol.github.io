@@ -60,6 +60,7 @@ model User {
   lastOnline      DateTime?
   avatarUrl       String?
   bannerUrl       String?
+  avatarFrame     String   @default("circle")
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

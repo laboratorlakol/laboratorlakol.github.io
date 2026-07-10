@@ -36,7 +36,7 @@ export default async function TopicPage({ params }: { params: Promise<{ slug: st
               <div key={post.id} className="panel rounded-md p-5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">{post.author?.username??"utilizator șters"}</span>
+                    {post.author ? (<Link href={`/profile/${post.author.username}`} className="text-sm font-medium hover:text-signal transition-colors">{post.author.username}</Link>) : (<span className="text-sm font-medium text-ink-faint">utilizator șters</span>)}
                     {post.author&&<span className="font-mono text-[10px] uppercase tracking-wider text-signal">{ROLE_LABELS[post.author.role as Role]}</span>}
                   </div>
                   <div className="flex items-center gap-3">

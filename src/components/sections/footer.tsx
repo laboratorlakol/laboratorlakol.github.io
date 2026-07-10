@@ -37,6 +37,8 @@ export function Footer({ discordUrl = DEFAULT_DISCORD }: { discordUrl?: string }
           <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-ink-faint">
             <Link href="/privacy" className="hover:text-signal transition-colors">Politică de Confidențialitate</Link>
             <span>·</span>
+            <Link href="/tos" className="hover:text-signal transition-colors">Termeni și Condiții</Link>
+            <span>·</span>
             <Link href="/regulament" className="hover:text-signal transition-colors">Regulament</Link>
             <span>·</span>
             <a href="mailto:contact@faded.ro" className="hover:text-signal transition-colors">contact@faded.ro</a>
