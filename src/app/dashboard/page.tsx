@@ -225,9 +225,23 @@ export default function DashboardPage() {
               <div>
                 <label className="font-mono text-xs uppercase tracking-wider text-ink-faint">Ramă poză de profil</label>
                 <div className="mt-2 flex gap-2 flex-wrap">
-                  {([['circle','Cerc'],['none','Fără'],['cannabis','Cannabis 🌿'],['hexagon','Hexagon']] as const).map(([val,label]) => (
-                    <button key={val} type="button" onClick={()=>setFrameChoice(val)} className={}>{label}</button>
-                  ))}
+                  {(["circle", "none", "cannabis", "hexagon"] as const).map((val) => {
+                    const labels: Record<string, string> = { circle: "Cerc", none: "Fără", cannabis: "Cannabis 🌿", hexagon: "Hexagon" };
+                    const active = frameChoice === val;
+                    return (
+                      <button
+                        key={val}
+                        type="button"
+                        onClick={() => setFrameChoice(val)}
+                        className={[
+                          "px-3 py-1.5 text-xs font-mono rounded-md border transition-colors",
+                          active ? "border-signal bg-signal/10 text-signal" : "border-line text-ink-faint hover:border-line-strong",
+                        ].join(" ")}
+                      >
+                        {labels[val]}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
               {mediaSaved && (
