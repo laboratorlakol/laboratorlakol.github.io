@@ -109,10 +109,8 @@ export default function DashboardPage() {
     } finally { setSavingMedia(false); }
   }
 
-  const playtimeHours = typeof (user as Record<string, unknown>).playtimeHours === "number"
-    ? (user as Record<string, unknown>).playtimeHours as number
-    : 0;
-  const avatarUrl = (user as Record<string, unknown>).avatarUrl as string | null;
+  const playtimeHours = user.playtimeHours ?? 0;
+  const avatarUrl = user.avatarUrl ?? null;
 
   return (
     <>
