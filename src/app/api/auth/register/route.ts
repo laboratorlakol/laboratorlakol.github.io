@@ -13,6 +13,7 @@ export async function POST(req: Request) {
   const { allowed } = rateLimit(`register:${ip}`, 5, 15*60*1000);
   if (!allowed) return NextResponse.json({ error: "too_many_requests", message: "Prea multe încercări." }, { status: 429 });
   const body = await req.json().catch(() => null);
+  if (!body?.tosAccepted) return NextResponse.json({ error: "tos_not_accepted", message: "Trebuie să accepți Termenii și Condițiile și Politica de Confidențialitate pentru a crea un cont." }, { status: 400 });
   const isHuman = await verifyTurnstileToken(body?.turnstileToken, ip);
   if (!isHuman) return NextResponse.json({ error: "bot_check_failed", message: "Verificarea anti-bot a picat. Reîncarcă pagina." }, { status: 403 });
   const parsed = registerSchema.safeParse(body);
@@ -25,7 +26,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "already_exists", message: field === "email" ? "Există deja un cont cu acest email." : "Acest username este deja folosit." }, { status: 409 });
   }
   const passwordHash = await hashPassword(password);
-  const user = await prisma.user.create({ data: { username, email: normalizedEmail, passwordHash }, select: { id: true, username: true, email: true } });
+  const user = await prisma.user.create({ data: { username, email: normalizedEmail, passwordHash, tosAcceptedAt: new Date() }, select: { id: true, username: true, email: true } });
   const { token, hash } = generateOpaqueToken();
   await prisma.emailVerificationToken.create({ data: { tokenHash: hash, userId: user.id, expiresAt: new Date(Date.now() + 24*60*60*1000) } });
   await sendVerificationEmail(user.email, token);

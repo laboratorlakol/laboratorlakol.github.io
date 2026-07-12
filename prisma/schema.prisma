@@ -61,6 +61,7 @@ model User {
   avatarUrl       String?
   bannerUrl       String?
   avatarFrame     String   @default("circle")
+  tosAcceptedAt   DateTime?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

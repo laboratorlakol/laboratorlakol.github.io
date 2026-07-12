@@ -13,6 +13,7 @@ export default function RegisterPage() {
   const { user, loading: authLoading } = useAuth();
   const [form, setForm] = useState({ username:"", email:"", password:"" });
   const [turnstileToken, setTurnstileToken] = useState<string|null>(null);
+  const [tosAccepted, setTosAccepted] = useState(false);
   const [error, setError] = useState<string|null>(null);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
@@ -48,8 +49,12 @@ export default function RegisterPage() {
           <p className="mt-1.5 text-xs text-ink-faint">Minimum 8 caractere, o literă mare și o cifră.</p>
         </div>
         {error && <p className="text-sm text-red-400 bg-red-950/30 border border-red-900/40 rounded-md px-3 py-2">{error}</p>}
+        <label className="flex items-start gap-3 cursor-pointer group">
+          <input type="checkbox" checked={tosAccepted} onChange={e=>setTosAccepted(e.target.checked)} className="mt-0.5 accent-[var(--signal)]"/>
+          <span className="text-xs text-ink-faint leading-relaxed">Am citit și accept <a href="/tos" target="_blank" className="text-signal hover:underline">Termenii și Condițiile</a> și <a href="/privacy" target="_blank" className="text-signal hover:underline">Politica de Confidențialitate</a> ale FADED Romania Roleplay.</span>
+        </label>
         <TurnstileWidget onVerify={setTurnstileToken} onExpire={()=>setTurnstileToken(null)}/>
-        <Button type="submit" variant="primary" className="w-full" disabled={loading}>{loading&&<Loader2 className="animate-spin" size={16}/>}Creează cont</Button>
+        <Button type="submit" variant="primary" className="w-full" disabled={loading||!tosAccepted}>{loading&&<Loader2 className="animate-spin" size={16}/>}Creează cont</Button>
       </form>
       <p className="mt-6 text-center text-sm text-ink-faint">Ai deja cont? <Link href="/login" className="text-signal hover:underline">Conectează-te</Link></p>
     </AuthLayout>
