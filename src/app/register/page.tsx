@@ -31,7 +31,7 @@ export default function RegisterPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault(); setError(null); setLoading(true);
     try {
-      const res=await fetch("/api/auth/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...form,turnstileToken})});
+      const res=await fetch("/api/auth/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...form,turnstileToken,tosAccepted:true})});
       const data=await res.json();
       if (!res.ok) { setError(data.message??data.issues?.[0]?.message??"A apărut o eroare."); return; }
       setDone(true);
